@@ -1,0 +1,174 @@
+/* 
+ * Print Stylesheet for Invoicer
+ * Optimized for A4/Letter paper, ink-saving, and readability.
+ */
+
+@media print {
+    /* Page Setup */
+    @page {
+        margin: 1.5cm;
+        size: auto;
+    }
+
+    /* 
+     * Visibility Control
+     * Hide all UI elements not relevant to the printed invoice 
+     */
+    body > *:not(main) {
+        display: none !important;
+    }
+
+    header, 
+    footer, 
+    .dashboard-header,
+    .dashboard-actions,
+    .form-actions,
+    #view-dashboard, 
+    #view-editor {
+        display: none !important;
+    }
+
+    /* Show and reset the Print View */
+    .print-only {
+        display: block !important;
+        position: relative !important;
+        visibility: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+    }
+
+    /* Reset Container */
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Typography & Colors for Print */
+    body {
+        font-family: 'Times New Roman', Times, serif; /* Professional serif for print */
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+        line-height: 1.4;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #000;
+        font-family: Helvetica, Arial, sans-serif; /* Sans-serif headings for contrast */
+        page-break-after: avoid;
+    }
+
+    /* Print Layout Structure */
+    #view-print {
+        background: white;
+    }
+
+    /* Header Section */
+    .print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #000;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .print-header h1 {
+        font-size: 24pt;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 0;
+    }
+
+    #print-meta {
+        text-align: right;
+    }
+
+    #print-meta p {
+        margin: 2px 0;
+    }
+
+    /* Addresses */
+    .print-addresses {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+    }
+
+    #print-from, #print-to {
+        width: 45%;
+    }
+
+    #print-from h3, #print-to h3 {
+        font-size: 10pt;
+        text-transform: uppercase;
+        color: #666;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+
+    /* Items Table */
+    #print-items table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    #print-items th {
+        text-align: left;
+        border-bottom: 2px solid #000;
+        padding: 10px 5px;
+        font-weight: bold;
+        font-size: 10pt;
+        text-transform: uppercase;
+    }
+
+    #print-items td {
+        padding: 10px 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    #print-items .amount-col {
+        text-align: right;
+    }
+
+    /* Totals */
+    #print-totals {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-top: 20px;
+        page-break-inside: avoid;
+    }
+
+    .print-total-row {
+        display: flex;
+        justify-content: space-between;
+        width: 300px;
+        padding: 5px 0;
+    }
+
+    .print-total-row.grand-total {
+        border-top: 2px solid #000;
+        font-weight: bold;
+        font-size: 14pt;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    /* Notes */
+    #print-notes {
+        margin-top: 50px;
+        border-top: 1px solid #ccc;
+        padding-top: 15px;
+        font-size: 10pt;
+        color: #444;
+        page-break-inside: avoid;
+    }
+}

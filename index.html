@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Storage Invoicer</title>
+    <meta name="description" content="A lightweight, client-side-only invoice manager.">
+    <!-- 
+    POWERED BY GEMINI 3 - Showcase Example
+    Demonstrating advanced architectural reasoning and code generation capabilities.
+    -->
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+    <header role="banner">
+        <div class="container">
+            <h1>Invoicer</h1>
+            <nav role="navigation" aria-label="Main Navigation">
+                <button id="nav-dashboard" class="nav-btn active" aria-current="page">Dashboard</button>
+                <button id="nav-create" class="nav-btn">New Invoice</button>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="container">
+        <!-- Dashboard View -->
+        <section id="view-dashboard" class="view-section active" aria-labelledby="dashboard-title">
+            <div class="dashboard-header">
+                <h2 id="dashboard-title">Dashboard</h2>
+                <div class="dashboard-actions">
+                    <input type="text" id="search-invoices" placeholder="Search invoices..." aria-label="Search invoices">
+                    <button id="btn-new-invoice" class="primary-btn">Create Invoice</button>
+                </div>
+            </div>
+            
+            <div id="dashboard-stats" class="stats-container">
+                <!-- Stats populated by JS -->
+                <div class="stat-card">
+                    <h3>Total Revenue</h3>
+                    <p id="total-revenue">$0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <p id="total-pending">$0.00</p>
+                </div>
+            </div>
+
+            <div class="invoice-list-container">
+                <table id="invoice-table" class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoice-list">
+                        <!-- Invoice items populated by JS -->
+                        <tr>
+                            <td colspan="6" class="empty-state">No invoices found. Create one to get started.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Editor View (Create/Edit) -->
+        <section id="view-editor" class="view-section hidden" aria-labelledby="editor-title">
+            <h2 id="editor-title">Invoice Editor</h2>
+            
+            <form id="invoice-form">
+                <input type="hidden" id="invoice-id">
+                
+                <div class="form-group form-row">
+                    <div class="col">
+                        <h3>Client Details</h3>
+                        <label for="client-name">Name</label>
+                        <input type="text" id="client-name" required>
+                        
+                        <label for="client-email">Email</label>
+                        <input type="email" id="client-email">
+                        
+                        <label for="client-address">Address</label>
+                        <textarea id="client-address" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="col">
+                        <h3>Invoice Details</h3>
+                        <label for="invoice-date">Date</label>
+                        <input type="date" id="invoice-date" required>
+                        
+                        <label for="invoice-due-date">Due Date</label>
+                        <input type="date" id="invoice-due-date" required>
+                        
+                        <label for="invoice-status">Status</label>
+                        <select id="invoice-status">
+                            <option value="draft">Draft</option>
+                            <option value="paid">Paid</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="line-items-section">
+                    <h3>Items</h3>
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="line-items-body">
+                            <!-- Line items populated by JS -->
+                        </tbody>
+                    </table>
+                    <button type="button" id="btn-add-item" class="secondary-btn">+ Add Item</button>
+                </div>
+
+                <div class="totals-section">
+                    <div class="total-row">
+                        <label>Subtotal:</label>
+                        <span id="invoice-subtotal">$0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <label for="tax-rate">Tax Rate (%):</label>
+                        <input type="number" id="tax-rate" min="0" step="0.1" value="0">
+                    </div>
+                    <div class="total-row">
+                        <label>Tax Amount:</label>
+                        <span id="invoice-tax-amount">$0.00</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <label>Total:</label>
+                        <span id="invoice-total">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="invoice-notes">Notes</label>
+                    <textarea id="invoice-notes" rows="2"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btn-cancel" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="btn-save" class="primary-btn">Save Invoice</button>
+                    <button type="button" id="btn-print-preview" class="secondary-btn">Print Preview</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Print View (Hidden usually, visible on print) -->
+        <section id="view-print" class="print-only" aria-hidden="true">
+            <!-- Print layout structure populated by JS or CSS mapping -->
+            <div class="print-header">
+                <h1>INVOICE</h1>
+                <div id="print-meta"></div>
+            </div>
+            <div class="print-addresses">
+                <div id="print-from">
+                    <!-- Sender Info (Settings) -->
+                </div>
+                <div id="print-to">
+                    <!-- Client Info -->
+                </div>
+            </div>
+            <div id="print-items"></div>
+            <div id="print-totals"></div>
+            <div id="print-notes"></div>
+        </section>
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>&copy; 2025 Local Storage Invoicer. Data stored locally.</p>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <!-- Load order matters: Storage -> Model -> UI -> App -->
+    <script src="js/storage.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
