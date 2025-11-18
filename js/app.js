@@ -26,6 +26,10 @@ const App = {
             this.loadEditor(); // No ID = create new
         });
 
+        document.getElementById('nav-settings').addEventListener('click', () => {
+            this.loadSettings();
+        });
+
         // Dashboard Actions
         document.getElementById('btn-new-invoice').addEventListener('click', () => {
             this.loadEditor();
@@ -66,6 +70,61 @@ const App = {
             const formData = UI.getFormData();
             this.renderPrintPreview(formData);
             window.print();
+        });
+
+        // Settings Actions
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSaveSettings();
+        });
+
+        document.getElementById('settings-logo').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    const base64 = await UI.handleLogoUpload(file);
+                    const settings = Storage.getSettings();
+                    settings.logo = base64;
+                    UI.renderSettings(settings); // Update preview
+                } catch (err) {
+                    console.error('Logo upload failed', err);
+                    alert('Failed to load image. Please try another file.');
+                }
+            }
+        });
+
+        document.getElementById('btn-clear-logo').addEventListener('click', () => {
+            const settings = Storage.getSettings();
+            settings.logo = null;
+            // We don't save immediately, just update UI context.
+            // Actually, better to update the form state visually.
+            // Since renderSettings takes an object, we can pass the modified one.
+            // But we need to store this pending change somewhere or just rely on what's in the "session"
+            // if we were strictly MVC. For simplicity, we'll update the UI and let saveSettings handle the final persistence
+            // but we need a way to know the logo was cleared if we don't persist it here.
+            // Easier approach: Update the UI elements directly or persist to a temp state?
+            // Let's just update the UI elements to show empty. The save logic needs to know though.
+            // For now, we'll update the Storage settings temporarily or assume the user hits save?
+            // Let's just clear the input and preview.
+            // The save handler needs to read the current state.
+            // Since we don't have a "getSettingsFromForm" method in UI,
+            // we'll actually modify the storage settings object in memory if we want to persist it on save?
+            // Or better, let's just save it to a temp variable?
+            // Simplest for this architecture: Just update the UI and clear the file input.
+            // But wait, how does handleSaveSettings know?
+            // Let's assume handleSaveSettings reads values.
+            // Logo is special. Let's store the draft logo in a property on App or just directly update Storage?
+            // No, standard pattern is "Save" commits changes.
+            // We'll attach the draft logo to the form element data-attribute or similar?
+            // Or simply: The preview image src IS the data source for the save operation if we want to be clever.
+            
+            // Let's update the UI preview to hidden.
+            const preview = document.getElementById('settings-logo-preview');
+            preview.src = '';
+            preview.classList.add('hidden');
+            document.getElementById('logo-placeholder').classList.remove('hidden');
+            document.getElementById('btn-clear-logo').classList.add('hidden');
+            document.getElementById('settings-logo').value = ''; // clear input
         });
 
         // Line Items Management
@@ -118,12 +177,57 @@ const App = {
             }
         } else {
             invoice = Model.createEmptyInvoice();
+            // Apply default settings
+            const settings = Storage.getSettings();
+            if (settings.defaultTaxRate) {
+                invoice.taxRate = settings.defaultTaxRate;
+            }
             // Add one empty item by default for new invoices
             invoice.items.push(Model.createLineItem());
         }
 
         UI.renderEditor(invoice);
         UI.showView('editor');
+    },
+
+    /**
+     * Load and display settings
+     */
+    loadSettings() {
+        const settings = Storage.getSettings();
+        UI.renderSettings(settings);
+        UI.showView('settings');
+    },
+
+    /**
+     * Handle saving settings
+     */
+    handleSaveSettings() {
+        const el = UI.elements.settings;
+        
+        // Get logo from preview src (if visible) or null
+        // This is a bit hacky but avoids duplicating state
+        let logo = null;
+        if (!el.logoPreview.classList.contains('hidden') && el.logoPreview.src) {
+            logo = el.logoPreview.src;
+        }
+
+        const settings = {
+            name: el.name.value,
+            address: el.address.value,
+            defaultTaxRate: parseFloat(el.defaultTax.value) || 0,
+            logo: logo
+        };
+
+        try {
+            if (Storage.saveSettings(settings)) {
+                alert('Settings saved successfully.');
+            } else {
+                alert('Failed to save settings.');
+            }
+        } catch (e) {
+            alert(e.message);
+        }
     },
 
     /**

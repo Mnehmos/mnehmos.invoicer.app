@@ -21,6 +21,7 @@
             <nav role="navigation" aria-label="Main Navigation">
                 <button id="nav-dashboard" class="nav-btn active" aria-current="page">Dashboard</button>
                 <button id="nav-create" class="nav-btn">New Invoice</button>
+                <button id="nav-settings" class="nav-btn">Settings</button>
             </nav>
         </div>
     </header>
@@ -158,12 +159,59 @@
             </form>
         </section>
 
+        <!-- Settings View -->
+        <section id="view-settings" class="view-section hidden" aria-labelledby="settings-title">
+            <h2 id="settings-title">Settings</h2>
+            
+            <form id="settings-form">
+                <div class="form-group">
+                    <h3>Company Branding</h3>
+                    <div class="logo-settings-container">
+                        <div class="logo-preview-area">
+                            <img id="settings-logo-preview" src="" alt="Company Logo" class="hidden">
+                            <div id="logo-placeholder" class="logo-placeholder">No Logo</div>
+                        </div>
+                        <div class="logo-controls">
+                            <label for="settings-logo">Upload Logo</label>
+                            <input type="file" id="settings-logo" accept="image/png, image/jpeg, image/svg+xml">
+                            <p class="help-text">Recommended: PNG or JPG, max 500KB.</p>
+                            <button type="button" id="btn-clear-logo" class="secondary-btn hidden">Remove Logo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h3>Sender Details</h3>
+                    <label for="settings-name">Company Name</label>
+                    <input type="text" id="settings-name" placeholder="Your Company Name">
+                    
+                    <label for="settings-address">Address</label>
+                    <textarea id="settings-address" rows="3" placeholder="123 Business Rd, City, Country"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <h3>Defaults</h3>
+                    <label for="settings-default-tax">Default Tax Rate (%)</label>
+                    <input type="number" id="settings-default-tax" min="0" step="0.1" placeholder="0">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="btn-save-settings" class="primary-btn">Save Settings</button>
+                </div>
+            </form>
+        </section>
+
         <!-- Print View (Hidden usually, visible on print) -->
         <section id="view-print" class="print-only" aria-hidden="true">
             <!-- Print layout structure populated by JS or CSS mapping -->
             <div class="print-header">
-                <h1>INVOICE</h1>
-                <div id="print-meta"></div>
+                <div class="print-logo-container">
+                    <img id="print-logo" src="" alt="Logo" class="hidden">
+                </div>
+                <div class="print-header-content">
+                    <h1>INVOICE</h1>
+                    <div id="print-meta"></div>
+                </div>
             </div>
             <div class="print-addresses">
                 <div id="print-from">

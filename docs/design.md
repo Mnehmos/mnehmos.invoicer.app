@@ -47,7 +47,7 @@ A lightweight, client-side-only Single Page Application (SPA) for creating, mana
 }
 ```
 
-### 4.2 Settings Object (Optional Future Scope)
+### 4.2 Settings Object
 ```json
 {
   "currency": "USD",
@@ -55,6 +55,11 @@ A lightweight, client-side-only Single Page Application (SPA) for creating, mana
   "senderInfo": {
     "name": "string",
     "address": "string"
+  },
+  "logo": {
+    "dataUrl": "string (Base64)",
+    "width": "number",
+    "height": "number"
   }
 }
 ```
@@ -78,10 +83,17 @@ project-root/
 
 ### 6.1 Dashboard (Home)
 - **List View:** Table or cards showing existing invoices.
-- **Actions:** "New Invoice", "Delete", "Edit", "Search/Filter".
+- **Actions:** "New Invoice", "Settings", "Delete", "Edit", "Search/Filter".
 - **Summary:** Total revenue, pending amounts (computed on load).
 
-### 6.2 Editor (Create/Edit)
+### 6.2 Settings View
+- **Form:**
+  - Company Logo Upload (File Input -> Base64 conversion).
+  - Default Tax Rate.
+  - Sender Info (Name, Address).
+- **Actions:** "Save Settings", "Clear Logo".
+
+### 6.3 Editor (Create/Edit)
 - **Form:**
   - Client Details inputs.
   - Date pickers.

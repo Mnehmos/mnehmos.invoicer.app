@@ -9,7 +9,18 @@ const UI = {
         views: {
             dashboard: document.getElementById('view-dashboard'),
             editor: document.getElementById('view-editor'),
+            settings: document.getElementById('view-settings'),
             print: document.getElementById('view-print')
+        },
+        settings: {
+            form: document.getElementById('settings-form'),
+            logoInput: document.getElementById('settings-logo'),
+            logoPreview: document.getElementById('settings-logo-preview'),
+            logoPlaceholder: document.getElementById('logo-placeholder'),
+            clearLogoBtn: document.getElementById('btn-clear-logo'),
+            name: document.getElementById('settings-name'),
+            address: document.getElementById('settings-address'),
+            defaultTax: document.getElementById('settings-default-tax')
         },
         dashboard: {
             list: document.getElementById('invoice-list'),
@@ -72,7 +83,8 @@ const UI = {
         // Map view to nav button if exists
         const navMap = {
             'dashboard': 'nav-dashboard',
-            'editor': 'nav-create' 
+            'editor': 'nav-create',
+            'settings': 'nav-settings'
         };
         
         if (navMap[viewId]) {
@@ -250,10 +262,20 @@ const UI = {
 
     /**
      * Render the print view
-     * @param {Object} invoice 
+     * @param {Object} invoice
      */
     renderPrintView(invoice) {
         const el = this.elements.print;
+        const settings = Storage.getSettings();
+
+        // Header with Logo
+        const logoImg = document.getElementById('print-logo');
+        if (settings.logo) {
+            logoImg.src = settings.logo;
+            logoImg.classList.remove('hidden');
+        } else {
+            logoImg.classList.add('hidden');
+        }
         
         // Meta
         el.meta.innerHTML = `
@@ -264,11 +286,10 @@ const UI = {
         `;
 
         // Addresses
-        // In a real app, sender info would come from Settings
         el.from.innerHTML = `
             <h3>From:</h3>
-            <p>Invoicer App User</p>
-            <p>Business Address</p>
+            <p><strong>${this.escapeHtml(settings.name || 'Invoicer User')}</strong></p>
+            <div class="address-block">${this.escapeHtml(settings.address || '').replace(/\n/g, '<br>')}</div>
         `;
 
         el.to.innerHTML = `
@@ -333,6 +354,44 @@ const UI = {
         } else {
             el.notes.innerHTML = '';
         }
+    },
+
+    /**
+     * Populate the settings form
+     * @param {Object} settings
+     */
+    renderSettings(settings) {
+        const el = this.elements.settings;
+        
+        el.name.value = settings.name || '';
+        el.address.value = settings.address || '';
+        el.defaultTax.value = settings.defaultTaxRate || 0;
+
+        if (settings.logo) {
+            el.logoPreview.src = settings.logo;
+            el.logoPreview.classList.remove('hidden');
+            el.logoPlaceholder.classList.add('hidden');
+            el.clearLogoBtn.classList.remove('hidden');
+        } else {
+            el.logoPreview.src = '';
+            el.logoPreview.classList.add('hidden');
+            el.logoPlaceholder.classList.remove('hidden');
+            el.clearLogoBtn.classList.add('hidden');
+        }
+    },
+
+    /**
+     * Handle logo upload and conversion to Base64
+     * @param {File} file
+     * @returns {Promise<string>} Base64 string
+     */
+    handleLogoUpload(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
     },
 
     /**

@@ -78,6 +78,33 @@ const Storage = {
     },
 
     /**
+     * Get application settings
+     * @returns {Object} Settings object
+     */
+    getSettings() {
+        const data = this.getData();
+        return data.settings || this._getDefaults().settings;
+    },
+
+    /**
+     * Save application settings
+     * @param {Object} settings - Settings object
+     * @returns {boolean} success
+     */
+    saveSettings(settings) {
+        try {
+            const data = this.getData();
+            data.settings = { ...data.settings, ...settings };
+            this.saveData(data);
+            return true;
+        } catch (e) {
+            console.error('Failed to save settings:', e);
+            if (e instanceof StorageError) throw e;
+            return false;
+        }
+    },
+
+    /**
      * Get all invoices
      * @returns {Array} List of invoices
      */
