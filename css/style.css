@@ -1,30 +1,29 @@
 /*
  * Modern CSS Architecture for Invoicer
- * Mnehmos Brand Theme - Light Professional
+ * Mnehmos Brand Theme - Light Professional with Copper Accent
  * Uses CSS Custom Properties for theming and consistency
  */
 
 :root {
-    /* Brand Colors - Mnehmos Purple Accent */
-    --brand-primary: #7c3aed;
-    --brand-primary-hover: #6d28d9;
-    --brand-primary-light: #ede9fe;
-    --brand-accent: #a78bfa;
+    /* Brand Colors - Mnehmos Copper */
+    --copper: #b87333;
+    --copper-light: #d4956a;
+    --copper-hover: #a06429;
 
     /* Theme Colors */
-    --primary-color: var(--brand-primary);
-    --primary-hover: var(--brand-primary-hover);
-    --secondary-color: #64748b;
-    --secondary-hover: #475569;
-    --background-color: #f8fafc;
+    --primary-color: var(--copper);
+    --primary-hover: var(--copper-hover);
+    --secondary-color: #78716c;
+    --secondary-hover: #57534e;
+    --background-color: #fafaf9;
     --surface-color: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --border-color: #e2e8f0;
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    --border-color: #e7e5e4;
 
     /* Status Colors */
-    --status-draft-bg: #f1f5f9;
-    --status-draft-text: #475569;
+    --status-draft-bg: #f5f5f4;
+    --status-draft-text: #57534e;
     --status-paid-bg: #dcfce7;
     --status-paid-text: #166534;
     --status-overdue-bg: #fee2e2;
@@ -121,12 +120,12 @@ nav {
 
 .nav-btn:hover {
     color: var(--primary-color);
-    background-color: var(--brand-primary-light);
+    background-color: var(--status-draft-bg);
 }
 
 .nav-btn.active {
     color: var(--primary-color);
-    background-color: var(--brand-primary-light);
+    background-color: #fef3e8;
     font-weight: 600;
 }
 
@@ -220,7 +219,7 @@ main {
 }
 
 .invoice-table th {
-    background-color: #f8fafc;
+    background-color: #fafaf9;
     padding: var(--spacing-md);
     font-weight: 600;
     color: var(--text-secondary);
@@ -239,7 +238,7 @@ main {
 }
 
 .invoice-table tr:hover {
-    background-color: #f8fafc;
+    background-color: #fafaf9;
 }
 
 .empty-state {
@@ -276,8 +275,8 @@ main {
 }
 
 .secondary-btn:hover {
-    background-color: #f1f5f9;
-    border-color: #cbd5e1;
+    background-color: #f5f5f4;
+    border-color: #d6d3d1;
     color: var(--text-primary);
 }
 
@@ -293,7 +292,7 @@ main {
 
 .icon-btn:hover {
     color: var(--primary-color);
-    background-color: var(--brand-primary-light);
+    background-color: #f5f5f4;
 }
 
 .icon-btn.delete-btn:hover {
@@ -371,13 +370,13 @@ input, select, textarea {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
     margin-bottom: var(--spacing-md);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.1);
 }
 
 /* Line Items */
@@ -474,7 +473,7 @@ footer a {
 }
 
 footer a:hover {
-    color: var(--primary-hover);
+    color: var(--copper-light);
     text-decoration: underline;
 }
 
@@ -528,7 +527,7 @@ footer a:hover {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #f8fafc;
+    background-color: #fafaf9;
 }
 
 .logo-preview-area img {
@@ -559,4 +558,16 @@ footer a:hover {
 /* Print Visibility - Hide by default */
 .print-only {
     display: none !important;
+}
+
+/* Selection */
+::selection {
+    background-color: var(--copper);
+    color: white;
+}
+
+/* Focus States */
+*:focus-visible {
+    outline: 2px solid var(--copper);
+    outline-offset: 2px;
 }
