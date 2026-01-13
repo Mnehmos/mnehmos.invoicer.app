@@ -1,12 +1,19 @@
-/* 
+/*
  * Modern CSS Architecture for Invoicer
+ * Mnehmos Brand Theme - Light Professional
  * Uses CSS Custom Properties for theming and consistency
  */
 
 :root {
+    /* Brand Colors - Mnehmos Purple Accent */
+    --brand-primary: #7c3aed;
+    --brand-primary-hover: #6d28d9;
+    --brand-primary-light: #ede9fe;
+    --brand-accent: #a78bfa;
+
     /* Theme Colors */
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary-color: var(--brand-primary);
+    --primary-hover: var(--brand-primary-hover);
     --secondary-color: #64748b;
     --secondary-hover: #475569;
     --background-color: #f8fafc;
@@ -14,7 +21,7 @@
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --border-color: #e2e8f0;
-    
+
     /* Status Colors */
     --status-draft-bg: #f1f5f9;
     --status-draft-text: #475569;
@@ -114,12 +121,12 @@ nav {
 
 .nav-btn:hover {
     color: var(--primary-color);
-    background-color: var(--status-draft-bg);
+    background-color: var(--brand-primary-light);
 }
 
 .nav-btn.active {
     color: var(--primary-color);
-    background-color: #eff6ff;
+    background-color: var(--brand-primary-light);
     font-weight: 600;
 }
 
@@ -286,7 +293,7 @@ main {
 
 .icon-btn:hover {
     color: var(--primary-color);
-    background-color: #f1f5f9;
+    background-color: var(--brand-primary-light);
 }
 
 .icon-btn.delete-btn:hover {
@@ -364,13 +371,13 @@ input, select, textarea {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
     margin-bottom: var(--spacing-md);
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 /* Line Items */
@@ -455,6 +462,20 @@ footer {
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+}
+
+footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+footer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
 }
 
 /* Responsive Adjustments */
@@ -463,15 +484,15 @@ footer {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .dashboard-actions {
         flex-direction: column;
     }
-    
+
     #search-invoices {
         width: 100%;
     }
-    
+
     .stats-container {
         grid-template-columns: 1fr;
     }
@@ -480,62 +501,62 @@ footer {
         display: block;
         overflow-x: auto;
     }
-    
+
     .form-actions {
         flex-direction: column-reverse;
     }
-    
+
     .form-actions button {
-            width: 100%;
-        }
+        width: 100%;
     }
-    
-    /* Settings View Specific Styles */
-    .logo-settings-container {
-        display: flex;
-        gap: var(--spacing-lg);
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-    
-    .logo-preview-area {
-        width: 150px;
-        height: 150px;
-        border: 2px dashed var(--border-color);
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        background-color: #f8fafc;
-    }
-    
-    .logo-preview-area img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-    
-    .logo-placeholder {
-        color: var(--text-secondary);
-        font-size: var(--font-size-sm);
-        text-align: center;
-        padding: var(--spacing-sm);
-    }
-    
-    .logo-controls {
-        flex: 1;
-        min-width: 200px;
-    }
-    
-    .help-text {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        margin-top: -0.5rem;
-        margin-bottom: var(--spacing-md);
-    }
-    
-    /* Print Visibility - Hide by default */
+}
+
+/* Settings View Specific Styles */
+.logo-settings-container {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.logo-preview-area {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.logo-preview-area img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.logo-placeholder {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    padding: var(--spacing-sm);
+}
+
+.logo-controls {
+    flex: 1;
+    min-width: 200px;
+}
+
+.help-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: -0.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Print Visibility - Hide by default */
 .print-only {
     display: none !important;
 }
