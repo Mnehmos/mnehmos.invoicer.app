@@ -1,10 +1,11 @@
 /*
  * Modern CSS Architecture for Invoicer
- * Mnehmos Brand Theme - Light Professional with Copper Accent
+ * Mnehmos Brand Theme - Dark/Light with Copper Accent
  * Uses CSS Custom Properties for theming and consistency
  */
 
-:root {
+/* === LIGHT MODE (opt-in) === */
+:root.light {
     /* Brand Colors - Mnehmos Copper */
     --copper: #b87333;
     --copper-light: #d4956a;
@@ -17,6 +18,7 @@
     --secondary-hover: #57534e;
     --background-color: #fafaf9;
     --surface-color: #ffffff;
+    --surface-secondary: #f5f5f4;
     --text-primary: #1c1917;
     --text-secondary: #57534e;
     --border-color: #e7e5e4;
@@ -28,6 +30,40 @@
     --status-paid-text: #166534;
     --status-overdue-bg: #fee2e2;
     --status-overdue-text: #991b1b;
+
+    /* Active nav background */
+    --nav-active-bg: #fef3e8;
+}
+
+/* === DARK MODE (default) === */
+:root, :root.dark {
+    /* Brand Colors - Mnehmos Copper */
+    --copper: #b87333;
+    --copper-light: #d4956a;
+    --copper-hover: #ce8b4a;
+
+    /* Theme Colors */
+    --primary-color: var(--copper);
+    --primary-hover: var(--copper-hover);
+    --secondary-color: #a8a29e;
+    --secondary-hover: #d6d3d1;
+    --background-color: #0f172a;
+    --surface-color: #1e293b;
+    --surface-secondary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #475569;
+
+    /* Status Colors */
+    --status-draft-bg: #334155;
+    --status-draft-text: #94a3b8;
+    --status-paid-bg: #14532d;
+    --status-paid-text: #86efac;
+    --status-overdue-bg: #7f1d1d;
+    --status-overdue-text: #fca5a5;
+
+    /* Active nav background */
+    --nav-active-bg: rgba(184, 115, 51, 0.2);
 
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -45,6 +81,12 @@
 
     /* Borders & Shadows */
     --border-radius: 0.5rem;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+}
+
+/* Light mode shadow override */
+:root.light {
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
@@ -69,6 +111,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Layout Utilities */
@@ -86,6 +129,7 @@ header {
     padding: var(--spacing-md) 0;
     margin-bottom: var(--spacing-xl);
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 header .container {
@@ -104,6 +148,7 @@ header h1 {
 nav {
     display: flex;
     gap: var(--spacing-md);
+    align-items: center;
 }
 
 .nav-btn {
@@ -120,13 +165,58 @@ nav {
 
 .nav-btn:hover {
     color: var(--primary-color);
-    background-color: var(--status-draft-bg);
+    background-color: var(--surface-secondary);
 }
 
 .nav-btn.active {
     color: var(--primary-color);
-    background-color: #fef3e8;
+    background-color: var(--nav-active-bg);
     font-weight: 600;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: var(--spacing-md);
+}
+
+.theme-toggle:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: var(--surface-secondary);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Hide/show icons based on theme */
+.theme-toggle .sun-icon {
+    display: none;
+}
+
+.theme-toggle .moon-icon {
+    display: block;
+}
+
+:root.light .theme-toggle .sun-icon {
+    display: block;
+}
+
+:root.light .theme-toggle .moon-icon {
+    display: none;
 }
 
 /* Main Content */
@@ -172,6 +262,8 @@ main {
     border-radius: var(--border-radius);
     font-size: var(--font-size-sm);
     min-width: 250px;
+    background-color: var(--surface-color);
+    color: var(--text-primary);
 }
 
 .stats-container {
@@ -187,6 +279,7 @@ main {
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .stat-card h3 {
@@ -210,6 +303,7 @@ main {
     border: 1px solid var(--border-color);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .invoice-table {
@@ -219,7 +313,7 @@ main {
 }
 
 .invoice-table th {
-    background-color: #fafaf9;
+    background-color: var(--surface-secondary);
     padding: var(--spacing-md);
     font-weight: 600;
     color: var(--text-secondary);
@@ -238,7 +332,7 @@ main {
 }
 
 .invoice-table tr:hover {
-    background-color: #fafaf9;
+    background-color: var(--surface-secondary);
 }
 
 .empty-state {
@@ -269,14 +363,14 @@ main {
 }
 
 .secondary-btn {
-    background-color: white;
+    background-color: var(--surface-color);
     border-color: var(--border-color);
     color: var(--text-secondary);
 }
 
 .secondary-btn:hover {
-    background-color: #f5f5f4;
-    border-color: #d6d3d1;
+    background-color: var(--surface-secondary);
+    border-color: var(--text-secondary);
     color: var(--text-primary);
 }
 
@@ -292,12 +386,12 @@ main {
 
 .icon-btn:hover {
     color: var(--primary-color);
-    background-color: #f5f5f4;
+    background-color: var(--surface-secondary);
 }
 
 .icon-btn.delete-btn:hover {
     color: #ef4444;
-    background-color: #fee2e2;
+    background-color: var(--status-overdue-bg);
 }
 
 /* Status Badges */
@@ -334,6 +428,7 @@ main {
     box-shadow: var(--shadow-sm);
     max-width: 900px;
     margin: 0 auto;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .form-group {
@@ -370,13 +465,15 @@ input, select, textarea {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
     margin-bottom: var(--spacing-md);
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background-color 0.3s;
+    background-color: var(--surface-color);
+    color: var(--text-primary);
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.1);
+    box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.2);
 }
 
 /* Line Items */
@@ -463,6 +560,7 @@ footer {
     margin-top: auto;
     border-top: 1px solid var(--border-color);
     background-color: var(--surface-color);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 footer a {
@@ -508,6 +606,22 @@ footer a:hover {
     .form-actions button {
         width: 100%;
     }
+
+    header .container {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .theme-toggle {
+        margin-left: auto;
+    }
 }
 
 /* Settings View Specific Styles */
@@ -527,7 +641,7 @@ footer a:hover {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #fafaf9;
+    background-color: var(--surface-secondary);
 }
 
 .logo-preview-area img {
@@ -570,4 +684,22 @@ footer a:hover {
 *:focus-visible {
     outline: 2px solid var(--copper);
     outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
 }
