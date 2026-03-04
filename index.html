@@ -61,7 +61,7 @@
                 <table id="invoice-table" class="invoice-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Invoice #</th>
                             <th>Client</th>
                             <th>Date</th>
                             <th>Total</th>
@@ -101,6 +101,10 @@
                     
                     <div class="col">
                         <h3>Invoice Details</h3>
+                        <label for="invoice-number">Invoice Number</label>
+                        <input type="text" id="invoice-number" placeholder="Auto-generated">
+                        <p class="help-text">Leave blank to auto-generate, or enter a custom number.</p>
+
                         <label for="invoice-date">Date</label>
                         <input type="date" id="invoice-date" required>
                         
@@ -163,6 +167,8 @@
                     <button type="button" id="btn-cancel" class="secondary-btn">Cancel</button>
                     <button type="submit" id="btn-save" class="primary-btn">Save Invoice</button>
                     <button type="button" id="btn-print-preview" class="secondary-btn">Print Preview</button>
+                    <button type="button" id="btn-export-pdf" class="secondary-btn">Export PDF</button>
+                    <button type="button" id="btn-export-ods" class="secondary-btn">Export ODS</button>
                 </div>
             </form>
         </section>
@@ -180,10 +186,21 @@
                             <div id="logo-placeholder" class="logo-placeholder">No Logo</div>
                         </div>
                         <div class="logo-controls">
-                            <label for="settings-logo">Upload Logo</label>
+                            <label for="settings-logo">Display Logo (PNG, JPG, SVG)</label>
                             <input type="file" id="settings-logo" accept="image/png, image/jpeg, image/svg+xml">
-                            <p class="help-text">Recommended: PNG or JPG, max 500KB.</p>
-                            <button type="button" id="btn-clear-logo" class="secondary-btn hidden">Remove Logo</button>
+                            <p class="help-text">Used on invoices and print. Recommended max 500KB.</p>
+                            <button type="button" id="btn-clear-logo" class="secondary-btn hidden">Remove Display Logo</button>
+
+                            <hr style="margin: 1rem 0; border-color: var(--border-color);">
+
+                            <label for="settings-cdr-logo">Original Logo File (CDR/CorelDRAW)</label>
+                            <input type="file" id="settings-cdr-logo" accept=".cdr">
+                            <p class="help-text">Optional. Stored for download only; browsers cannot render CDR files.</p>
+                            <div id="cdr-logo-info" class="hidden">
+                                <span id="cdr-logo-filename" class="help-text"></span>
+                                <button type="button" id="btn-download-cdr" class="secondary-btn">Download CDR</button>
+                                <button type="button" id="btn-clear-cdr" class="secondary-btn">Remove CDR</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -201,6 +218,21 @@
                     <h3>Defaults</h3>
                     <label for="settings-default-tax">Default Tax Rate (%)</label>
                     <input type="number" id="settings-default-tax" min="0" step="0.1" placeholder="0">
+                </div>
+
+                <div class="form-group">
+                    <h3>Invoice Numbering</h3>
+                    <label for="settings-invoice-prefix">Invoice Prefix</label>
+                    <input type="text" id="settings-invoice-prefix" placeholder="INV-">
+                    <p class="help-text">Optional prefix before the number (e.g., "INV-", "2026-")</p>
+
+                    <label for="settings-next-number">Next Invoice Number</label>
+                    <input type="number" id="settings-next-number" min="1" step="1" placeholder="1">
+                    <p class="help-text">Adjust to continue from a previous system.</p>
+
+                    <label for="settings-number-padding">Number Padding</label>
+                    <input type="number" id="settings-number-padding" min="1" max="10" step="1" value="4">
+                    <p class="help-text">Zero-pad width (4 = "0001", 6 = "000001")</p>
                 </div>
 
                 <div class="form-actions">
@@ -241,6 +273,11 @@
             <p>A <a href="https://mnehmos.github.io/vario.automation.website/" target="_blank" rel="noopener">Vario Automation</a> tool</p>
         </div>
     </footer>
+
+    <!-- External Libraries (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <!-- Theme (load first to prevent flash) -->
     <script src="js/theme.js"></script>

@@ -20,7 +20,10 @@ const UI = {
             clearLogoBtn: document.getElementById('btn-clear-logo'),
             name: document.getElementById('settings-name'),
             address: document.getElementById('settings-address'),
-            defaultTax: document.getElementById('settings-default-tax')
+            defaultTax: document.getElementById('settings-default-tax'),
+            invoicePrefix: document.getElementById('settings-invoice-prefix'),
+            nextNumber: document.getElementById('settings-next-number'),
+            numberPadding: document.getElementById('settings-number-padding')
         },
         dashboard: {
             list: document.getElementById('invoice-list'),
@@ -31,6 +34,7 @@ const UI = {
         editor: {
             form: document.getElementById('invoice-form'),
             id: document.getElementById('invoice-id'),
+            invoiceNumber: document.getElementById('invoice-number'),
             // Client
             clientName: document.getElementById('client-name'),
             clientEmail: document.getElementById('client-email'),
@@ -116,16 +120,19 @@ const UI = {
             const tr = document.createElement('tr');
             const statusClass = `status-${inv.status}`; // e.g. status-paid, status-draft
             
+            const displayNum = inv.invoiceNumber ? this.escapeHtml(inv.invoiceNumber) : '#' + inv.id.substring(0, 8) + '...';
             tr.innerHTML = `
-                <td>#${inv.id.substring(0, 8)}...</td>
+                <td>${displayNum}</td>
                 <td>${this.escapeHtml(inv.client.name)}</td>
                 <td>${Model.formatDate(inv.createdDate)}</td>
                 <td>${Model.formatCurrency(inv.total)}</td>
                 <td><span class="badge ${statusClass}">${inv.status}</span></td>
                 <td class="actions-cell">
-                    <button class="btn-icon edit-invoice" data-id="${inv.id}" title="Edit">✎</button>
-                    <button class="btn-icon delete-invoice" data-id="${inv.id}" title="Delete">🗑</button>
-                    <button class="btn-icon print-invoice" data-id="${inv.id}" title="Print">🖨</button>
+                    <button class="btn-icon edit-invoice" data-id="${inv.id}" title="Edit">&#9998;</button>
+                    <button class="btn-icon delete-invoice" data-id="${inv.id}" title="Delete">&#128465;</button>
+                    <button class="btn-icon print-invoice" data-id="${inv.id}" title="Print">&#128424;</button>
+                    <button class="btn-icon pdf-invoice" data-id="${inv.id}" title="Export PDF">&#128196;</button>
+                    <button class="btn-icon ods-invoice" data-id="${inv.id}" title="Export ODS">&#128202;</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -159,6 +166,7 @@ const UI = {
         const el = this.elements.editor;
         
         el.id.value = invoice.id || '';
+        el.invoiceNumber.value = invoice.invoiceNumber || '';
         el.clientName.value = invoice.client.name || '';
         el.clientEmail.value = invoice.client.email || '';
         el.clientAddress.value = invoice.client.address || '';
@@ -247,6 +255,7 @@ const UI = {
         // Construct invoice
         const invoice = {
             id: el.id.value,
+            invoiceNumber: el.invoiceNumber.value,
             createdDate: el.date.value,
             dueDate: el.dueDate.value,
             status: el.status.value,
@@ -279,7 +288,7 @@ const UI = {
         
         // Meta
         el.meta.innerHTML = `
-            <p><strong>Invoice #:</strong> ${invoice.id}</p>
+            <p><strong>Invoice #:</strong> ${invoice.invoiceNumber || invoice.id}</p>
             <p><strong>Date:</strong> ${Model.formatDate(invoice.createdDate)}</p>
             <p><strong>Due Date:</strong> ${Model.formatDate(invoice.dueDate)}</p>
             <p><strong>Status:</strong> ${invoice.status.toUpperCase()}</p>
@@ -377,6 +386,22 @@ const UI = {
             el.logoPreview.classList.add('hidden');
             el.logoPlaceholder.classList.remove('hidden');
             el.clearLogoBtn.classList.add('hidden');
+        }
+
+        // Invoice numbering
+        el.invoicePrefix.value = settings.invoicePrefix || '';
+        el.nextNumber.value = settings.nextInvoiceNumber || 1;
+        el.numberPadding.value = settings.invoiceNumberPadding || 4;
+
+        // CDR logo
+        const cdrInfo = document.getElementById('cdr-logo-info');
+        if (cdrInfo) {
+            if (settings.logoOriginalCDR) {
+                cdrInfo.classList.remove('hidden');
+                document.getElementById('cdr-logo-filename').textContent = 'File: ' + (settings.logoOriginalCDRName || 'logo.cdr');
+            } else {
+                cdrInfo.classList.add('hidden');
+            }
         }
     },
 

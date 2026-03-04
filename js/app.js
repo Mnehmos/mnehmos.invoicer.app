@@ -51,6 +51,12 @@ const App = {
                 this.handleDelete(id);
             } else if (btn.classList.contains('print-invoice')) {
                 this.handlePrint(id);
+            } else if (btn.classList.contains('pdf-invoice')) {
+                const invoice = Storage.getInvoice(id);
+                if (invoice) this.handleExportPDF(invoice);
+            } else if (btn.classList.contains('ods-invoice')) {
+                const invoice = Storage.getInvoice(id);
+                if (invoice) this.handleExportODS(invoice);
             }
         });
 
@@ -65,11 +71,19 @@ const App = {
         });
 
         document.getElementById('btn-print-preview').addEventListener('click', () => {
-            // Save first (or just validate), then print
-            // For now, let's just generate the preview from current form data
             const formData = UI.getFormData();
             this.renderPrintPreview(formData);
             window.print();
+        });
+
+        document.getElementById('btn-export-pdf').addEventListener('click', () => {
+            const formData = UI.getFormData();
+            this.handleExportPDF(formData);
+        });
+
+        document.getElementById('btn-export-ods').addEventListener('click', () => {
+            const formData = UI.getFormData();
+            this.handleExportODS(formData);
         });
 
         // Settings Actions
@@ -91,6 +105,56 @@ const App = {
                     alert('Failed to load image. Please try another file.');
                 }
             }
+        });
+
+        // CDR Logo Upload
+        document.getElementById('settings-cdr-logo').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.cdr')) {
+                alert('Please upload a .cdr (CorelDRAW) file.');
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                if (!confirm('This CDR file is larger than 2MB. Large files may cause storage issues. Continue?')) {
+                    e.target.value = '';
+                    return;
+                }
+            }
+
+            try {
+                const base64 = await UI.handleLogoUpload(file);
+                this._pendingCDR = { data: base64, name: file.name };
+                document.getElementById('cdr-logo-info').classList.remove('hidden');
+                document.getElementById('cdr-logo-filename').textContent = 'File: ' + file.name;
+            } catch (err) {
+                console.error('CDR upload failed', err);
+                alert('Failed to read CDR file.');
+            }
+        });
+
+        // Download CDR
+        document.getElementById('btn-download-cdr').addEventListener('click', () => {
+            const settings = Storage.getSettings();
+            const cdrData = (this._pendingCDR && this._pendingCDR.data) || settings.logoOriginalCDR;
+            const cdrName = (this._pendingCDR && this._pendingCDR.name) || settings.logoOriginalCDRName || 'logo.cdr';
+
+            if (!cdrData) return;
+
+            const link = document.createElement('a');
+            link.href = cdrData;
+            link.download = cdrName;
+            link.click();
+        });
+
+        // Clear CDR
+        document.getElementById('btn-clear-cdr').addEventListener('click', () => {
+            this._pendingCDR = null;
+            this._clearCDR = true;
+            document.getElementById('cdr-logo-info').classList.add('hidden');
+            document.getElementById('settings-cdr-logo').value = '';
         });
 
         document.getElementById('btn-clear-logo').addEventListener('click', () => {
@@ -177,12 +241,12 @@ const App = {
             }
         } else {
             invoice = Model.createEmptyInvoice();
-            // Apply default settings
             const settings = Storage.getSettings();
             if (settings.defaultTaxRate) {
                 invoice.taxRate = settings.defaultTaxRate;
             }
-            // Add one empty item by default for new invoices
+            // Pre-fill next invoice number
+            invoice.invoiceNumber = Storage.getNextInvoiceNumber();
             invoice.items.push(Model.createLineItem());
         }
 
@@ -204,9 +268,7 @@ const App = {
      */
     handleSaveSettings() {
         const el = UI.elements.settings;
-        
-        // Get logo from preview src (if visible) or null
-        // This is a bit hacky but avoids duplicating state
+
         let logo = null;
         if (!el.logoPreview.classList.contains('hidden') && el.logoPreview.src) {
             logo = el.logoPreview.src;
@@ -216,8 +278,22 @@ const App = {
             name: el.name.value,
             address: el.address.value,
             defaultTaxRate: parseFloat(el.defaultTax.value) || 0,
-            logo: logo
+            logo: logo,
+            invoicePrefix: el.invoicePrefix.value,
+            nextInvoiceNumber: parseInt(el.nextNumber.value, 10) || 1,
+            invoiceNumberPadding: parseInt(el.numberPadding.value, 10) || 4
         };
+
+        // CDR logo handling
+        if (this._pendingCDR) {
+            settings.logoOriginalCDR = this._pendingCDR.data;
+            settings.logoOriginalCDRName = this._pendingCDR.name;
+            this._pendingCDR = null;
+        } else if (this._clearCDR) {
+            settings.logoOriginalCDR = null;
+            settings.logoOriginalCDRName = '';
+            this._clearCDR = false;
+        }
 
         try {
             if (Storage.saveSettings(settings)) {
@@ -291,19 +367,39 @@ const App = {
      */
     handleSave() {
         const invoiceData = UI.getFormData();
-        
-        // Basic validation handled by HTML5 forms (required attributes), 
-        // but logic validation happens in Storage
+        const isNew = !invoiceData.id;
+        let usedAutoNumber = false;
+
+        // Auto-assign invoice number for new invoices with empty number
+        if (isNew && !invoiceData.invoiceNumber) {
+            invoiceData.invoiceNumber = Storage.getNextInvoiceNumber();
+            usedAutoNumber = true;
+        }
+
+        // Warn on duplicate invoice number
+        if (invoiceData.invoiceNumber) {
+            const existing = Storage.getInvoices().find(
+                inv => inv.invoiceNumber === invoiceData.invoiceNumber && inv.id !== invoiceData.id
+            );
+            if (existing) {
+                if (!confirm(`Invoice number "${invoiceData.invoiceNumber}" is already used. Save anyway?`)) {
+                    return;
+                }
+            }
+        }
+
         try {
             const success = Storage.saveInvoice(invoiceData);
             if (success) {
-                // Optional: Show success message
+                if (isNew && (usedAutoNumber || invoiceData.invoiceNumber === Storage.getNextInvoiceNumber())) {
+                    Storage.incrementInvoiceNumber();
+                }
                 this.loadDashboard();
             } else {
                 alert('Failed to save invoice. Please check data.');
             }
         } catch (e) {
-            alert(e.message); // Show specific storage error
+            alert(e.message);
         }
     },
 
@@ -338,13 +434,237 @@ const App = {
 
     /**
      * Render print view specifically
-     * @param {Object} invoice 
+     * @param {Object} invoice
      */
     renderPrintPreview(invoice) {
         UI.renderPrintView(invoice);
-        // Note: CSS @media print handles showing the #view-print section
-        // and hiding others, so we don't strictly need to switch view via JS,
-        // but we DO need to populate the print container.
+    },
+
+    /**
+     * Generate and download PDF for an invoice
+     * @param {Object} invoice
+     */
+    async handleExportPDF(invoice) {
+        if (typeof window.jspdf === 'undefined') {
+            alert('PDF library not loaded. Please check your internet connection and reload.');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const settings = Storage.getSettings();
+        const invoiceNum = invoice.invoiceNumber || invoice.id;
+        let yPos = 20;
+
+        // Logo
+        if (settings.logo) {
+            try {
+                let logoData = settings.logo;
+                const isSVG = settings.logo.startsWith('data:image/svg');
+
+                if (isSVG) {
+                    // Rasterize SVG to PNG via canvas
+                    logoData = await new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.naturalWidth || 200;
+                            canvas.height = img.naturalHeight || 100;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            resolve(canvas.toDataURL('image/png'));
+                        };
+                        img.onerror = () => resolve(null);
+                        img.src = settings.logo;
+                    });
+                }
+
+                if (logoData) {
+                    const logoType = logoData.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+                    doc.addImage(logoData, logoType, 14, yPos, 40, 20);
+                }
+            } catch (e) {
+                console.warn('Could not add logo to PDF:', e);
+            }
+        }
+
+        // Header
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('INVOICE', 200, yPos + 5, { align: 'right' });
+
+        yPos += 15;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Invoice #: ' + invoiceNum, 200, yPos, { align: 'right' });
+        yPos += 5;
+        doc.text('Date: ' + Model.formatDate(invoice.createdDate), 200, yPos, { align: 'right' });
+        yPos += 5;
+        doc.text('Due: ' + Model.formatDate(invoice.dueDate), 200, yPos, { align: 'right' });
+        yPos += 5;
+        doc.text('Status: ' + invoice.status.toUpperCase(), 200, yPos, { align: 'right' });
+
+        // Line
+        yPos += 8;
+        doc.setLineWidth(0.5);
+        doc.line(14, yPos, 200, yPos);
+        yPos += 10;
+
+        // From / To
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FROM:', 14, yPos);
+        doc.text('BILL TO:', 110, yPos);
+
+        yPos += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+
+        const fromLines = [
+            settings.name || 'Invoicer User',
+            ...(settings.address || '').split('\n').filter(Boolean)
+        ];
+        let leftY = yPos;
+        fromLines.forEach(line => {
+            doc.text(line, 14, leftY);
+            leftY += 5;
+        });
+
+        const toLines = [
+            invoice.client.name,
+            invoice.client.email,
+            ...(invoice.client.address || '').split('\n')
+        ].filter(Boolean);
+        let rightY = yPos;
+        toLines.forEach(line => {
+            doc.text(line, 110, rightY);
+            rightY += 5;
+        });
+
+        yPos = Math.max(leftY, rightY) + 10;
+
+        // Items table
+        const tableData = invoice.items.map(item => [
+            item.description,
+            item.quantity.toString(),
+            Model.formatCurrency(item.rate),
+            Model.formatCurrency(item.amount)
+        ]);
+
+        doc.autoTable({
+            startY: yPos,
+            head: [['Description', 'Qty', 'Rate', 'Amount']],
+            body: tableData,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [184, 115, 51],
+                textColor: 255,
+                fontStyle: 'bold'
+            },
+            columnStyles: {
+                1: { halign: 'right' },
+                2: { halign: 'right' },
+                3: { halign: 'right' }
+            },
+            margin: { left: 14, right: 14 }
+        });
+
+        yPos = doc.lastAutoTable.finalY + 10;
+
+        // Totals
+        const totalsX = 140;
+        doc.setFontSize(10);
+        doc.text('Subtotal:', totalsX, yPos);
+        doc.text(Model.formatCurrency(invoice.subtotal), 200, yPos, { align: 'right' });
+        yPos += 6;
+
+        doc.text('Tax (' + invoice.taxRate + '%):', totalsX, yPos);
+        doc.text(Model.formatCurrency(invoice.taxAmount), 200, yPos, { align: 'right' });
+        yPos += 6;
+
+        doc.setLineWidth(0.3);
+        doc.line(totalsX, yPos, 200, yPos);
+        yPos += 6;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('Total:', totalsX, yPos);
+        doc.text(Model.formatCurrency(invoice.total), 200, yPos, { align: 'right' });
+        yPos += 10;
+
+        // Notes
+        if (invoice.notes) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setLineWidth(0.2);
+            doc.line(14, yPos, 200, yPos);
+            yPos += 6;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Notes:', 14, yPos);
+            yPos += 5;
+            doc.setFont('helvetica', 'normal');
+            const noteLines = doc.splitTextToSize(invoice.notes, 180);
+            doc.text(noteLines, 14, yPos);
+        }
+
+        doc.save('invoice-' + invoiceNum + '.pdf');
+    },
+
+    /**
+     * Generate and download ODS spreadsheet for an invoice
+     * @param {Object} invoice
+     */
+    handleExportODS(invoice) {
+        if (typeof XLSX === 'undefined') {
+            alert('Spreadsheet library not loaded. Please check your internet connection and reload.');
+            return;
+        }
+
+        const settings = Storage.getSettings();
+        const invoiceNum = invoice.invoiceNumber || invoice.id;
+
+        const data = [];
+        data.push(['Invoice Number', invoiceNum]);
+        data.push(['Date', Model.formatDate(invoice.createdDate)]);
+        data.push(['Due Date', Model.formatDate(invoice.dueDate)]);
+        data.push(['Status', invoice.status.toUpperCase()]);
+        data.push([]);
+        data.push(['From', settings.name || 'Invoicer User']);
+        data.push(['Address', settings.address || '']);
+        data.push([]);
+        data.push(['Bill To', invoice.client.name]);
+        data.push(['Email', invoice.client.email || '']);
+        data.push(['Address', invoice.client.address || '']);
+        data.push([]);
+
+        // Items
+        data.push(['Description', 'Quantity', 'Rate', 'Amount']);
+        invoice.items.forEach(item => {
+            data.push([item.description, item.quantity, item.rate, item.amount]);
+        });
+        data.push([]);
+
+        // Totals
+        data.push(['', '', 'Subtotal', invoice.subtotal]);
+        data.push(['', '', 'Tax (' + invoice.taxRate + '%)', invoice.taxAmount]);
+        data.push(['', '', 'Total', invoice.total]);
+
+        if (invoice.notes) {
+            data.push([]);
+            data.push(['Notes', invoice.notes]);
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [
+            { wch: 30 },
+            { wch: 12 },
+            { wch: 15 },
+            { wch: 15 }
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
+        XLSX.writeFile(wb, 'invoice-' + invoiceNum + '.ods', { bookType: 'ods' });
     }
 };
 

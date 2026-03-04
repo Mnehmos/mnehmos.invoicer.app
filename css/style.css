@@ -669,6 +669,20 @@ footer a:hover {
     margin-bottom: var(--spacing-md);
 }
 
+/* CDR Logo Info */
+#cdr-logo-info {
+    margin-top: var(--spacing-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+#cdr-logo-info .secondary-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
 /* Print Visibility - Hide by default */
 .print-only {
     display: none !important;

@@ -4,7 +4,7 @@
  */
 
 const STORAGE_KEY = 'invoicer_data';
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
 class StorageError extends Error {
     constructor(message, code) {
@@ -29,11 +29,20 @@ const Storage = {
             if (!rawData) {
                 this._initializeDefaults();
             } else {
-                // Potential migration path here if versions differ
                 const data = JSON.parse(rawData);
                 if (!data.version) {
-                    // Legacy data or first run with versioning
-                    data.version = APP_VERSION;
+                    data.version = '1.0.0';
+                    this.saveData(data);
+                }
+                // Migrate from 1.0.0 to 1.1.0
+                if (data.version === '1.0.0') {
+                    data.settings = { ...this._getDefaults().settings, ...data.settings };
+                    data.invoices.forEach(inv => {
+                        if (!inv.invoiceNumber) {
+                            inv.invoiceNumber = '';
+                        }
+                    });
+                    data.version = '1.1.0';
                     this.saveData(data);
                 }
             }
@@ -191,6 +200,27 @@ const Storage = {
     },
 
     /**
+     * Get the next formatted invoice number
+     * @returns {string}
+     */
+    getNextInvoiceNumber() {
+        const settings = this.getSettings();
+        const prefix = settings.invoicePrefix || '';
+        const num = settings.nextInvoiceNumber || 1;
+        const padding = settings.invoiceNumberPadding || 4;
+        return prefix + String(num).padStart(padding, '0');
+    },
+
+    /**
+     * Increment the invoice number counter
+     */
+    incrementInvoiceNumber() {
+        const data = this.getData();
+        data.settings.nextInvoiceNumber = (data.settings.nextInvoiceNumber || 1) + 1;
+        this.saveData(data);
+    },
+
+    /**
      * Search invoices by query string
      * @param {string} query - Search term
      * @returns {Array} Filtered invoices
@@ -205,6 +235,7 @@ const Storage = {
             // Search in basic fields
             const basicMatch = (
                 (inv.id && inv.id.toLowerCase().includes(term)) ||
+                (inv.invoiceNumber && inv.invoiceNumber.toLowerCase().includes(term)) ||
                 (inv.client && inv.client.name && inv.client.name.toLowerCase().includes(term)) ||
                 (inv.client && inv.client.email && inv.client.email.toLowerCase().includes(term)) ||
                 (inv.status && inv.status.toLowerCase().includes(term))
@@ -289,7 +320,10 @@ const Storage = {
             invoices: [],
             settings: {
                 currency: 'USD',
-                defaultTaxRate: 0
+                defaultTaxRate: 0,
+                invoicePrefix: '',
+                nextInvoiceNumber: 1,
+                invoiceNumberPadding: 4
             }
         };
     },
