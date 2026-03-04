@@ -486,6 +486,7 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
     margin-bottom: var(--spacing-md);
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 #items-table th {
@@ -496,13 +497,30 @@ input:focus, select:focus, textarea:focus {
     color: var(--text-secondary);
 }
 
+/* Column widths: Item 15%, Description 35%, Qty 12%, Rate 14%, Amount 14%, Action 10% */
+#items-table th:nth-child(1) { width: 15%; }
+#items-table th:nth-child(2) { width: 35%; }
+#items-table th:nth-child(3) { width: 12%; }
+#items-table th:nth-child(4) { width: 14%; }
+#items-table th:nth-child(5) { width: 14%; }
+#items-table th:nth-child(6) { width: 10%; }
+
 #items-table td {
     padding: var(--spacing-sm);
     vertical-align: top;
 }
 
-#items-table input {
+#items-table input,
+#items-table textarea {
     margin-bottom: 0;
+}
+
+#items-table textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 38px;
+    line-height: 1.4;
+    field-sizing: content;
 }
 
 /* Totals Section */

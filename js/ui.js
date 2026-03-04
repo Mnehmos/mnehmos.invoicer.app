@@ -206,8 +206,8 @@ const UI = {
         const tr = document.createElement('tr');
         
         tr.innerHTML = `
-            <td><input type="text" class="item-name" value="${this.escapeHtml(item.itemName || '')}" placeholder="Item code"></td>
-            <td><input type="text" class="item-desc" value="${this.escapeHtml(item.description)}" placeholder="Description" required></td>
+            <td><textarea class="item-name" placeholder="Item code" rows="1">${this.escapeHtml(item.itemName || '')}</textarea></td>
+            <td><textarea class="item-desc" placeholder="Description" required rows="1">${this.escapeHtml(item.description)}</textarea></td>
             <td><input type="number" class="item-qty" value="${item.quantity}" min="0" step="0.01" required></td>
             <td><input type="number" class="item-rate" value="${item.rate}" min="0" step="0.01" required></td>
             <td class="item-amount">${Model.formatCurrency(item.amount || 0)}</td>

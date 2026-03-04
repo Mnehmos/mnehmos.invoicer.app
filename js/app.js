@@ -204,15 +204,20 @@ const App = {
             }
         });
 
-        // Real-time Calculations
+        // Real-time Calculations + Auto-resize textareas
         const form = document.getElementById('invoice-form');
         form.addEventListener('input', (e) => {
             if (
-                e.target.classList.contains('item-qty') || 
+                e.target.classList.contains('item-qty') ||
                 e.target.classList.contains('item-rate') ||
                 e.target.id === 'tax-rate'
             ) {
                 this.updateRealtimeTotals();
+            }
+            // Auto-resize line item textareas
+            if (e.target.tagName === 'TEXTAREA' && (e.target.classList.contains('item-name') || e.target.classList.contains('item-desc'))) {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
             }
         });
     },
@@ -321,8 +326,8 @@ const App = {
         const tbody = document.getElementById('line-items-body');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" class="item-name" value="" placeholder="Item code"></td>
-            <td><input type="text" class="item-desc" value="" placeholder="Description" required></td>
+            <td><textarea class="item-name" placeholder="Item code" rows="1"></textarea></td>
+            <td><textarea class="item-desc" placeholder="Description" required rows="1"></textarea></td>
             <td><input type="number" class="item-qty" value="1" min="0" step="0.01" required></td>
             <td><input type="number" class="item-rate" value="0" min="0" step="0.01" required></td>
             <td class="item-amount">$0.00</td>
