@@ -321,7 +321,8 @@ const App = {
         const tbody = document.getElementById('line-items-body');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" class="item-desc" value="" placeholder="Item description" required></td>
+            <td><input type="text" class="item-name" value="" placeholder="Item code"></td>
+            <td><input type="text" class="item-desc" value="" placeholder="Description" required></td>
             <td><input type="number" class="item-qty" value="1" min="0" step="0.01" required></td>
             <td><input type="number" class="item-rate" value="0" min="0" step="0.01" required></td>
             <td class="item-amount">$0.00</td>
@@ -545,6 +546,7 @@ const App = {
 
         // Items table
         const tableData = invoice.items.map(item => [
+            item.itemName || '',
             item.description,
             item.quantity.toString(),
             Model.formatCurrency(item.rate),
@@ -553,7 +555,7 @@ const App = {
 
         doc.autoTable({
             startY: yPos,
-            head: [['Description', 'Qty', 'Rate', 'Amount']],
+            head: [['Item', 'Description', 'Qty', 'Rate', 'Amount']],
             body: tableData,
             theme: 'striped',
             headStyles: {
@@ -562,9 +564,9 @@ const App = {
                 fontStyle: 'bold'
             },
             columnStyles: {
-                1: { halign: 'right' },
                 2: { halign: 'right' },
-                3: { halign: 'right' }
+                3: { halign: 'right' },
+                4: { halign: 'right' }
             },
             margin: { left: 14, right: 14 }
         });
@@ -638,16 +640,16 @@ const App = {
         data.push([]);
 
         // Items
-        data.push(['Description', 'Quantity', 'Rate', 'Amount']);
+        data.push(['Item', 'Description', 'Quantity', 'Rate', 'Amount']);
         invoice.items.forEach(item => {
-            data.push([item.description, item.quantity, item.rate, item.amount]);
+            data.push([item.itemName || '', item.description, item.quantity, item.rate, item.amount]);
         });
         data.push([]);
 
         // Totals
-        data.push(['', '', 'Subtotal', invoice.subtotal]);
-        data.push(['', '', 'Tax (' + invoice.taxRate + '%)', invoice.taxAmount]);
-        data.push(['', '', 'Total', invoice.total]);
+        data.push(['', '', '', 'Subtotal', invoice.subtotal]);
+        data.push(['', '', '', 'Tax (' + invoice.taxRate + '%)', invoice.taxAmount]);
+        data.push(['', '', '', 'Total', invoice.total]);
 
         if (invoice.notes) {
             data.push([]);
@@ -656,6 +658,7 @@ const App = {
 
         const ws = XLSX.utils.aoa_to_sheet(data);
         ws['!cols'] = [
+            { wch: 15 },
             { wch: 30 },
             { wch: 12 },
             { wch: 15 },

@@ -34,6 +34,7 @@ const Model = {
     createLineItem() {
         return {
             id: crypto.randomUUID(),
+            itemName: '',
             description: '',
             quantity: 1,
             rate: 0,

@@ -206,7 +206,8 @@ const UI = {
         const tr = document.createElement('tr');
         
         tr.innerHTML = `
-            <td><input type="text" class="item-desc" value="${this.escapeHtml(item.description)}" placeholder="Item description" required></td>
+            <td><input type="text" class="item-name" value="${this.escapeHtml(item.itemName || '')}" placeholder="Item code"></td>
+            <td><input type="text" class="item-desc" value="${this.escapeHtml(item.description)}" placeholder="Description" required></td>
             <td><input type="number" class="item-qty" value="${item.quantity}" min="0" step="0.01" required></td>
             <td><input type="number" class="item-rate" value="${item.rate}" min="0" step="0.01" required></td>
             <td class="item-amount">${Model.formatCurrency(item.amount || 0)}</td>
@@ -245,6 +246,7 @@ const UI = {
         const rows = el.itemsBody.querySelectorAll('tr');
         rows.forEach(row => {
             items.push({
+                itemName: row.querySelector('.item-name') ? row.querySelector('.item-name').value : '',
                 description: row.querySelector('.item-desc').value,
                 quantity: parseFloat(row.querySelector('.item-qty').value) || 0,
                 rate: parseFloat(row.querySelector('.item-rate').value) || 0,
@@ -313,6 +315,7 @@ const UI = {
             <table class="print-table">
                 <thead>
                     <tr>
+                        <th>Item</th>
                         <th>Description</th>
                         <th class="text-right">Qty</th>
                         <th class="text-right">Rate</th>
@@ -325,6 +328,7 @@ const UI = {
         invoice.items.forEach(item => {
             itemsHtml += `
                 <tr>
+                    <td>${this.escapeHtml(item.itemName || '')}</td>
                     <td>${this.escapeHtml(item.description)}</td>
                     <td class="text-right">${item.quantity}</td>
                     <td class="text-right">${Model.formatCurrency(item.rate)}</td>
